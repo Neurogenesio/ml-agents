@@ -5,6 +5,8 @@ using UnityEngine;
 using UnityEditor;
 #endif
 using System.Linq;
+using MLAgents.CommunicatorObjects;
+
 #if ENABLE_TENSORFLOW
 using TensorFlow;
 
@@ -483,6 +485,11 @@ namespace MLAgents
                     brain.gameObject.name));
             }
 #endif
+        }
+
+        public Dictionary<string, UnityRLOutput.Types.ListAgentInfoProto> CollectAction(Dictionary<Agent, AgentInfo> agentInfo)
+        {
+            return new Dictionary<string, UnityRLOutput.Types.ListAgentInfoProto>();
         }
 
         /// Displays the parameters of the CoreBrainInternal in the Inspector 

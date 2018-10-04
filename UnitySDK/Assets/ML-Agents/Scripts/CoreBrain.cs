@@ -19,6 +19,9 @@ namespace MLAgents
         /// Implement this method to define the logic for deciding actions
         void DecideAction(Dictionary<Agent, AgentInfo> agentInfo);
 
+        Dictionary<string, global::MLAgents.CommunicatorObjects.UnityRLOutput.Types.ListAgentInfoProto> CollectAction(
+            Dictionary<Agent, AgentInfo> agentInfo);
+
         /// Implement this method to define what should be displayed in the brain Inspector
         void OnInspector();
     }

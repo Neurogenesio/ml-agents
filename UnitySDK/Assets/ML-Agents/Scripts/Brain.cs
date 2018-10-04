@@ -206,6 +206,7 @@ namespace MLAgents
             UpdateCoreBrains();
             coreBrain.InitializeCoreBrain(brainBatcher);
             aca.BrainDecideAction += DecideAction;
+            aca.BrainCollectDataAction += CollectAction;
             isInitialized = true;
         }
 
@@ -236,6 +237,13 @@ namespace MLAgents
         {
             coreBrain.DecideAction(agentInfos);
             agentInfos.Clear();
+        }
+        
+        Dictionary<string, global::MLAgents.CommunicatorObjects.UnityRLOutput.Types.ListAgentInfoProto> CollectAction()
+        {
+            var result = coreBrain.CollectAction(agentInfos);
+            agentInfos.Clear();
+            return result;
         }
     }
 }

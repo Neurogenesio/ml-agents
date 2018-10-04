@@ -2,6 +2,7 @@
 using System.Linq;
 using UnityEngine;
 using Google.Protobuf;
+using MLAgents.CommunicatorObjects;
 
 namespace MLAgents
 {
@@ -284,6 +285,37 @@ namespace MLAgents
                     m_hasQueried[k] = false;
                 }
             }
+        }
+        
+        public Dictionary<string, global::MLAgents.CommunicatorObjects.UnityRLOutput.Types.ListAgentInfoProto> collectData(string brainKey,
+            Dictionary<Agent, AgentInfo> agentInfo)
+        {
+            // The brain tried called GiveBrainInfo, update m_hasQueried
+            m_hasQueried[brainKey] = true;
+            // Populate the currentAgents dictionary
+            m_currentAgents[brainKey].Clear();
+            foreach (Agent agent in agentInfo.Keys)
+            {
+                m_currentAgents[brainKey].Add(agent);
+            }
+            // If at least one agent has data to send, then append data to
+            // the message and update hasSentState
+            Dictionary<string, global::MLAgents.CommunicatorObjects.UnityRLOutput.Types.ListAgentInfoProto> AgentInfos = new Dictionary<string, UnityRLOutput.Types.ListAgentInfoProto>();
+            AgentInfos.Add(
+                brainKey,
+                new CommunicatorObjects.UnityRLOutput.Types.ListAgentInfoProto());
+            if (m_currentAgents[brainKey].Count > 0)
+            {
+                foreach (Agent agent in m_currentAgents[brainKey])
+                {
+                    CommunicatorObjects.AgentInfoProto agentInfoProto =
+                        AgentInfoConvertor(agentInfo[agent]);
+                    AgentInfos[brainKey].Value.Add(agentInfoProto);
+                }
+                //m_hasData[brainKey] = true;
+            }
+
+            return AgentInfos;
         }
 
         /// <summary>

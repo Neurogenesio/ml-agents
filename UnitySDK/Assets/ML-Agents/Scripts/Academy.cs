@@ -2,6 +2,7 @@
 using UnityEngine;
 using System.IO;
 using System.Linq;
+using MLAgents.CommunicatorObjects;
 #if UNITY_EDITOR
 using UnityEditor;
 
@@ -194,6 +195,8 @@ namespace MLAgents
         // actions for their agents.
         public event System.Action BrainDecideAction;
 
+        public event System.Func<Dictionary<string, global::MLAgents.CommunicatorObjects.UnityRLOutput.Types.ListAgentInfoProto>> BrainCollectDataAction;
+
         // Signals to all the agents at each environment step along with the 
         // Academy's maxStepReached, done and stepCount values. The agents rely
         // on this event to update their own values of max step reached and done
@@ -280,6 +283,11 @@ namespace MLAgents
                 }
             }
 
+            if (communicator != null)
+                Debug.Log("Privet");
+            else
+                Debug.Log("Poka");
+
             brainBatcher = new MLAgents.Batcher(communicator);
 
             // Initialize Brains and communicator (if present)
@@ -317,7 +325,16 @@ namespace MLAgents
                     );
                 }
 
-                var pythonParameters = brainBatcher.SendAcademyParameters(academyParameters);
+                CommunicatorObjects.UnityRLInitializationInput pythonParameters = new UnityRLInitializationInput();
+                try
+                {
+                    pythonParameters = brainBatcher.SendAcademyParameters(academyParameters);
+                }
+
+                catch
+                {
+                    
+                }
                 Random.InitState(pythonParameters.Seed);
                 Application.logMessageReceived += HandleLog;
                 logPath = Path.GetFullPath(".") + "/UnitySDK.log";
@@ -588,6 +605,74 @@ namespace MLAgents
             AgentAct();
 
             stepCount += 1;
+        }
+        
+        public Dictionary<string, global::MLAgents.CommunicatorObjects.UnityRLOutput.Types.ListAgentInfoProto> EnvironmentInternalStep()
+        {
+            if (modeSwitched)
+            {
+                ConfigureEnvironment();
+                modeSwitched = false;
+            }
+
+            if ((isCommunicatorOn) &&
+                (lastCommunicatorMessageNumber != brainBatcher.GetNumberMessageReceived()))
+            {
+                lastCommunicatorMessageNumber = brainBatcher.GetNumberMessageReceived();
+                if (brainBatcher.GetCommand() ==
+                    MLAgents.CommunicatorObjects.CommandProto.Reset)
+                {
+                    UpdateResetParameters();
+
+                    SetIsInference(!brainBatcher.GetIsTraining());
+
+                    ForcedFullReset();
+                }
+
+                if (brainBatcher.GetCommand() ==
+                    MLAgents.CommunicatorObjects.CommandProto.Quit)
+                {
+#if UNITY_EDITOR
+                    EditorApplication.isPlaying = false;
+#endif
+                    Application.Quit();
+                    return new Dictionary<string, UnityRLOutput.Types.ListAgentInfoProto> ();
+                }
+            }
+            else if (!firstAcademyReset)
+            {
+                UpdateResetParameters();
+                ForcedFullReset();
+            }
+
+            if ((stepCount >= maxSteps) && maxSteps > 0)
+            {
+                maxStepReached = true;
+                Done();
+            }
+
+            AgentSetStatus(maxStepReached, done, stepCount);
+
+            brainBatcher.RegisterAcademyDoneFlag(done);
+
+            if (done)
+            {
+                EnvironmentReset();
+            }
+
+            AgentResetIfDone();
+
+            AgentSendState();
+
+            var result = BrainCollectDataAction();
+
+            AcademyStep();
+
+            AgentAct();
+
+            stepCount += 1;
+
+            return result;
         }
 
         /// <summary>

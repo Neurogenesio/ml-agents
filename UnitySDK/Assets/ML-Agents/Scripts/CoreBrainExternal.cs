@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using MLAgents.CommunicatorObjects;
 using UnityEngine;
 
 namespace MLAgents
@@ -44,6 +45,17 @@ namespace MLAgents
             {
                 brainBatcher.SendBrainInfo(brain.gameObject.name, agentInfo);
             }
+        }
+        
+        public Dictionary<string, global::MLAgents.CommunicatorObjects.UnityRLOutput.Types.ListAgentInfoProto> CollectAction(Dictionary<Agent, AgentInfo> agentInfo)
+        {
+            Dictionary<string, global::MLAgents.CommunicatorObjects.UnityRLOutput.Types.ListAgentInfoProto> result = new Dictionary<string, UnityRLOutput.Types.ListAgentInfoProto>();
+            if (brainBatcher != null)
+            {
+                result = brainBatcher.collectData(brain.gameObject.name, agentInfo);
+            }
+
+            return result;
         }
 
         /// Nothing needs to appear in the inspector 

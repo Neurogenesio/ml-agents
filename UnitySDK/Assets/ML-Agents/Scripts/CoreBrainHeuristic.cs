@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using MLAgents.CommunicatorObjects;
 using UnityEngine;
 
 #if UNITY_EDITOR
@@ -76,6 +77,11 @@ namespace MLAgents
                     agentInfo[agent].done,
                     agentInfo[agent].memories));
             }
+        }
+
+        public Dictionary<string, UnityRLOutput.Types.ListAgentInfoProto> CollectAction(Dictionary<Agent, AgentInfo> agentInfo)
+        {
+            return new Dictionary<string, UnityRLOutput.Types.ListAgentInfoProto>();
         }
 
         /// Displays an error if no decision component is attached to the brain

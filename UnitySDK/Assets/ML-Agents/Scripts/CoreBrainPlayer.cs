@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using MLAgents.CommunicatorObjects;
 using UnityEngine;
 using UnityEngine.Serialization;
 #if UNITY_EDITOR
@@ -133,6 +134,11 @@ namespace MLAgents
                 }
             }
 
+        }
+
+        public Dictionary<string, UnityRLOutput.Types.ListAgentInfoProto> CollectAction(Dictionary<Agent, AgentInfo> agentInfo)
+        {
+            return new Dictionary<string, UnityRLOutput.Types.ListAgentInfoProto>();
         }
 
         /// Displays continuous or discrete input mapping in the inspector
