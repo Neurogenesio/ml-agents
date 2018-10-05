@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using Google.Protobuf;
+using Grpc.Core;
 using UnityEngine;
 
 namespace DataClient
@@ -12,6 +13,8 @@ namespace DataClient
     public class Client
     {
         private const int port = 8080;
+        
+        private byte[] magic = new byte[] { 72, 69, 76, 79 };
 
         // ManualResetEvent instances signal completion.  
         private static ManualResetEvent connectDone =
@@ -27,6 +30,7 @@ namespace DataClient
 
         public Client()
         {
+            start_point:
             // Connect to a remote device.  
             try
             {
@@ -42,9 +46,11 @@ namespace DataClient
                     SocketType.Stream, ProtocolType.Tcp);
 
                 // Connect to the remote endpoint.  
-                client.BeginConnect(remoteEP,
-                    new AsyncCallback(ConnectCallback), client);
-                connectDone.WaitOne();
+                var result = client.BeginConnect(remoteEP, null, client);
+                //connectDone.WaitOne();
+                bool success = result.AsyncWaitHandle.WaitOne(5, true);
+                client.EndConnect(result);
+                    
 
                 
                 
@@ -63,11 +69,13 @@ namespace DataClient
             catch (Exception e)
             {
                 Debug.Log(e.ToString());
+                throw new Exception();
             }
         }
 
         private void ConnectCallback(IAsyncResult ar)
         {
+            
             try
             {
                 // Retrieve the socket from the state object.  
@@ -81,10 +89,13 @@ namespace DataClient
 
                 // Signal that the connection has been made.  
                 connectDone.Set();
+               
             }
             catch (Exception e)
             {
+                
                 Debug.Log(e.ToString());
+                //throw new Exception();
             }
         }
 
@@ -102,14 +113,19 @@ namespace DataClient
         {
             
             byte[] byteData = data.ToByteArray();
+            //int size = byteData.Length;
+            //yte[] length = new byte[] { 0, 0, 0, 0 };
+            
+            
+            
             byte[] length = BitConverter.GetBytes((byteData.Length));
-            
-            
+              
             var s = new MemoryStream();
+            s.Write(magic, 0, magic.Length);
             s.Write(length, 0, length.Length);
             s.Write(byteData, 0, byteData.Length);
             var b3 = s.ToArray();
-
+            
             // Begin sending the data to the remote device.  
             client.BeginSend(b3, 0, b3.Length, 0,
                 new AsyncCallback(SendCallback), client);

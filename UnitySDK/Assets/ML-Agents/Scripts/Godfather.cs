@@ -1,8 +1,12 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using DataClient;
 using UnityEngine;
 using MLAgents;
+using UnityScript.Macros;
+
 
 public class Godfather : MonoBehaviour {
 
@@ -13,11 +17,45 @@ public class Godfather : MonoBehaviour {
 
 	void Awake()
 	{
-		socket = new Client();
+		//socket = new Client();
 	}
     void Start ()
     {
-	    int i = 0;
+        Start:
+			try
+			{
+				socket = new Client();
+			}
+	    catch
+	    {
+		    Debug.Log("catch exception");
+		    //goto Start;
+	    }
+
+	    while (true)
+	    {
+		    var result = academy.EnvironmentInternalStep();
+		    foreach (var key in result.Keys)
+		    {
+			    var values = result[key];
+			    foreach (var value in values.Value)
+			    {
+				    foreach (var visual in value.VisualObservations)
+				    {
+					    try
+					    {
+						    //byte[] length = BitConverter.GetBytes((visual.Length));
+						    socket.Send(visual);
+					    }
+					    catch
+					    {
+						    goto Start;
+					    }
+				    }
+			    }
+		    }
+	    }
+	    /*int i = 0;
 	    while (i < 10)
 	    {
 		    var result = academy.EnvironmentInternalStep();
@@ -35,7 +73,8 @@ public class Godfather : MonoBehaviour {
 		    Debug.Log("Step:" + i);
 		    i++;
 		    
-	    }
+	    }*/
+	    
 	}
 	
 	// Update is called once per frame
