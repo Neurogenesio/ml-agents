@@ -17,7 +17,15 @@ public class Godfather : MonoBehaviour {
 
 	void Awake()
 	{
-		//socket = new Client();
+		try
+		{
+			socket = new Client();
+		}
+		catch
+		{
+			Debug.Log("catch exception");
+			//goto Start;
+		}
 	}
     void Start ()
     {
@@ -78,19 +86,7 @@ public class Godfather : MonoBehaviour {
 	}
 	
 	// Update is called once per frame
-	void FixedUpdate () {
-		Start:
-		try
-		{
-			socket = new Client();
-		}
-		catch
-		{
-			Debug.Log("catch exception");
-			//goto Start;
-		}
-
-		
+	void FixedUpdate () {	
 			var result = academy.EnvironmentInternalStep();
 			foreach (var key in result.Keys)
 			{
