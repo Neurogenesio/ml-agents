@@ -615,36 +615,6 @@ namespace MLAgents
                 modeSwitched = false;
             }
 
-            if ((isCommunicatorOn) &&
-                (lastCommunicatorMessageNumber != brainBatcher.GetNumberMessageReceived()))
-            {
-                lastCommunicatorMessageNumber = brainBatcher.GetNumberMessageReceived();
-                if (brainBatcher.GetCommand() ==
-                    MLAgents.CommunicatorObjects.CommandProto.Reset)
-                {
-                    UpdateResetParameters();
-
-                    SetIsInference(!brainBatcher.GetIsTraining());
-
-                    ForcedFullReset();
-                }
-
-                if (brainBatcher.GetCommand() ==
-                    MLAgents.CommunicatorObjects.CommandProto.Quit)
-                {
-#if UNITY_EDITOR
-                    EditorApplication.isPlaying = false;
-#endif
-                    Application.Quit();
-                    return new Dictionary<string, UnityRLOutput.Types.ListAgentInfoProto> ();
-                }
-            }
-            else if (!firstAcademyReset)
-            {
-                UpdateResetParameters();
-                ForcedFullReset();
-            }
-
             if ((stepCount >= maxSteps) && maxSteps > 0)
             {
                 maxStepReached = true;
@@ -692,7 +662,7 @@ namespace MLAgents
         /// </summary>
         void FixedUpdate()
         {
-            EnvironmentStep();
+            //EnvironmentStep();
         }
 
         /// <summary>

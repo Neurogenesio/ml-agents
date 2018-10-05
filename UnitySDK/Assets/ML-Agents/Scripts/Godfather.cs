@@ -21,7 +21,7 @@ public class Godfather : MonoBehaviour {
 	}
     void Start ()
     {
-        Start:
+        /*Start:
 			try
 			{
 				socket = new Client();
@@ -54,7 +54,7 @@ public class Godfather : MonoBehaviour {
 				    }
 			    }
 		    }
-	    }
+	    }*/
 	    /*int i = 0;
 	    while (i < 10)
 	    {
@@ -78,7 +78,39 @@ public class Godfather : MonoBehaviour {
 	}
 	
 	// Update is called once per frame
-	void Update () {
+	void FixedUpdate () {
+		Start:
+		try
+		{
+			socket = new Client();
+		}
+		catch
+		{
+			Debug.Log("catch exception");
+			//goto Start;
+		}
+
 		
-	}
+			var result = academy.EnvironmentInternalStep();
+			foreach (var key in result.Keys)
+			{
+				var values = result[key];
+				foreach (var value in values.Value)
+				{
+					foreach (var visual in value.VisualObservations)
+					{
+						try
+						{
+							//byte[] length = BitConverter.GetBytes((visual.Length));
+							socket.Send(visual);
+						}
+						catch
+						{
+							//goto Start;
+						}
+					}
+				}
+			}
+		}
+	
 }
