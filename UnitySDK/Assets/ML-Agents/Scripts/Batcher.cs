@@ -192,28 +192,44 @@ namespace MLAgents
             {
                 agentInfoProto.ActionMask.AddRange(info.actionMasks);
             }
+            foreach (Texture2D obs in info.visualObservations)
+            {
+                agentInfoProto.VisualObservations.Add(
+                    ByteString.CopyFrom(obs.EncodeToPNG())
+                );
+            }
+            return agentInfoProto;
+        }
+        
+        public static CommunicatorObjects.AgentInfoProto 
+                                         AgentInfoConvertorInternal(AgentInfo info)
+        {
+
+            var agentInfoProto = new CommunicatorObjects.AgentInfoProto
+            {
+                StackedVectorObservation = { info.stackedVectorObservation },
+                StoredVectorActions = { info.storedVectorActions },
+                StoredTextActions = info.storedTextActions,
+                TextObservation = info.textObservation,
+                Reward = info.reward,
+                MaxStepReached = info.maxStepReached,
+                Done = info.done,
+                Id = info.id,
+            };
+            if (info.memories != null)
+            {
+                agentInfoProto.Memories.Add(info.memories);
+            }
+            if (info.actionMasks != null)
+            {
+                agentInfoProto.ActionMask.AddRange(info.actionMasks);
+            }
 
             int i = 1;
             Mat image = new Mat();
             Mat trimap = new Mat();
             foreach (Texture2D obs in info.visualObservations)
             {
-                
-                //Color32[] texDataColor = obs.GetPixels32();
-                //Pin Memory
-                //fixed (Color32* p = texDataColor)
-                //{
-                   //TextureToCVMat((IntPtr)p, obs.width, obs.height);
-                //}
-                /*agentInfoProto.VisualObservations.Add(
-                    ByteString.CopyFrom(obs.GetRawTextureData())
-                );*/
-                //obs.GetRawTextureData()
-                //var fileBytes= ByteString.CopyFrom(obs.EncodeToPNG()).ToByteArray();
-                /*using (Stream file = File.OpenWrite(@"d:\here.txt"))
-                {
-                    file.Write(fileBytes, 0, fileBytes.Length);
-                }*/
                 if (i == 1)
                 {
                     var bytes = obs.GetPixels32();
@@ -225,7 +241,7 @@ namespace MLAgents
                     var bytes = obs.GetPixels32();
                     trimap = UnityTextureToOpenCVImage(bytes, obs.width, obs.height);
                     var one_channel = trimap.Split()[0];
-                    Mat alpha = new Mat(obs.width, obs.height, DepthType.Cv8U, 1);
+                    Mat alpha = new Mat(obs.height, obs.width, DepthType.Cv8U, 1);
                     alpha.SetTo(new MCvScalar(0));
                     alpha.SetTo(new MCvScalar(255), one_channel);
                     CvInvoke.Resize(alpha, alpha, new Size(), 0.5, 0.5, Inter.Area);
@@ -240,33 +256,28 @@ namespace MLAgents
                     var image_bytes = result.ToImage<Bgra, byte>();
                     agentInfoProto.VisualObservations.Add(ByteString.CopyFrom(image_bytes.Bytes));
                 }
-                //var bytes = obs.GetPixels32();
-                //var output = UnityTextureToOpenCVImage(bytes, obs.width, obs.height);
-                //output.Save("image.png");
             }
             return agentInfoProto;
         }
         
-        public static Mat UnityTextureToOpenCVImage(Color32[] data, int width, int height){ 
+         public static Mat UnityTextureToOpenCVImage(Color32[] data, int width, int height){ 
 
-            byte[,,] imageData = new byte[width, height, 3]; 
+            byte[,,] imageData = new byte[height, width, 3]; 
 
 
             int index = 0; 
-            for (int y = height - 1 ; y > -1; y--) { 
-                for (int x = width - 1; x > -1; x--) { 
-                    imageData[y,x,0] = data[index].b; 
-                    imageData[y,x,1] = data[index].g; 
-                    imageData[y,x,2] = data[index].r; 
+            for (int y = height - 1; y > -1; y--) {
+                for (int x = 0; x < width; x++) {
+                    imageData[y,x,0] = data[index].b;
+                    imageData[y,x,1] = data[index].g;
+                    imageData[y,x,2] = data[index].r;
 
-                    index++; 
-                } 
-            } 
+                    index++;
+                }
+            }
 
             Image<Bgr, byte> image = new Image<Bgr, byte>(imageData);
-            var img = image.Flip(Emgu.CV.CvEnum.FlipType.Horizontal);
-
-            return img.Mat;
+            return image.Mat;
         } 
 
         /// <summary>
@@ -386,7 +397,7 @@ namespace MLAgents
                 foreach (Agent agent in m_currentAgents[brainKey])
                 {
                     CommunicatorObjects.AgentInfoProto agentInfoProto =
-                        AgentInfoConvertor(agentInfo[agent]);
+                        AgentInfoConvertorInternal(agentInfo[agent]);
                     AgentInfos[brainKey].Value.Add(agentInfoProto);
                 }
                 //m_hasData[brainKey] = true;
