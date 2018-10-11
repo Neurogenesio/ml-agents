@@ -37,7 +37,7 @@ namespace DataClient
                 // Establish the remote endpoint for the socket.  
                 // The name of the   
                 // remote device is "host.contoso.com".  
-                IPHostEntry ipHostInfo = Dns.GetHostEntry("172.28.24.228");
+                IPHostEntry ipHostInfo = Dns.GetHostEntry(GetArg("-ip"));
                 IPAddress ipAddress = ipHostInfo.AddressList[0];
                 IPEndPoint remoteEP = new IPEndPoint(ipAddress, port);
 
@@ -109,20 +109,18 @@ namespace DataClient
                 new AsyncCallback(SendCallback), client);
         }
         
-        public void Send(ByteString data)
+        public void Send(VisualObservationStruct obs)
         {
+            byte[] byteData = obs.observation.ToByteArray();
+            byte[] img_width = BitConverter.GetBytes(obs.width);
+            byte[] img_height = BitConverter.GetBytes(obs.height);
+            byte[] img_channels = BitConverter.GetBytes(obs.channels);
             
-            byte[] byteData = data.ToByteArray();
-            //int size = byteData.Length;
-            //yte[] length = new byte[] { 0, 0, 0, 0 };
-            
-            
-            
-            byte[] length = BitConverter.GetBytes((byteData.Length));
-              
             var s = new MemoryStream();
             s.Write(magic, 0, magic.Length);
-            s.Write(length, 0, length.Length);
+            s.Write(img_width, 0, img_width.Length);
+            s.Write(img_height, 0, img_height.Length);
+            s.Write(img_channels, 0, img_channels.Length);
             s.Write(byteData, 0, byteData.Length);
             var b3 = s.ToArray();
             
@@ -149,6 +147,19 @@ namespace DataClient
             {
                 Debug.Log(e.ToString());
             }
+        }
+        
+        public static string GetArg(string name)
+        {
+            var args = System.Environment.GetCommandLineArgs();
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (args[i] == name && args.Length > i + 1)
+                {
+                    return args[i + 1];
+                }
+            }
+            return null;
         }
     }
 }

@@ -8,6 +8,7 @@ using MLAgents;
 using UnityScript.Macros;
 
 
+
 public class Godfather : MonoBehaviour {
 
     public Academy academy;
@@ -93,7 +94,7 @@ public class Godfather : MonoBehaviour {
 				var values = result[key];
 				foreach (var value in values.Value)
 				{
-					foreach (var visual in value.VisualObservations)
+					foreach (var visual in value.visualObservationsStruct)
 					{
 						try
 						{

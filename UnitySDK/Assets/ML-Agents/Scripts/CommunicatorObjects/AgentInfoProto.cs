@@ -203,6 +203,15 @@ namespace MLAgents.CommunicatorObjects {
       get { return actionMask_; }
     }
 
+    public const int VisualObservationStructFieldNumber = 12;
+    private pbc::RepeatedField<VisualObservationStruct> visualObservationsStruct_ = new pbc::RepeatedField<VisualObservationStruct>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pbc::RepeatedField<VisualObservationStruct> visualObservationsStruct {
+      get { return visualObservationsStruct_; }
+      set{}
+    }
+    
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as AgentInfoProto);
