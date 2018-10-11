@@ -171,14 +171,6 @@ namespace MLAgents
         /// environment was switched by the external Brain. This impacts the
         /// engine settings at the next environment step.
         bool modeSwitched;
-        
-        private bool dataGeneration = false;
-
-        public void setdataGeneration(bool value)
-        {
-            dataGeneration = value;
-            
-        }
 
         /// Pointer to the batcher currently in use by the Academy.
         MLAgents.Batcher brainBatcher;
@@ -670,8 +662,7 @@ namespace MLAgents
         /// </summary>
         void FixedUpdate()
         {
-            if (!dataGeneration)
-                EnvironmentStep();
+            //EnvironmentStep();
         }
 
         /// <summary>

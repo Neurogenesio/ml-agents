@@ -192,38 +192,6 @@ namespace MLAgents
             {
                 agentInfoProto.ActionMask.AddRange(info.actionMasks);
             }
-            foreach (Texture2D obs in info.visualObservations)
-            {
-                agentInfoProto.VisualObservations.Add(
-                    ByteString.CopyFrom(obs.EncodeToPNG())
-                );
-            }
-            return agentInfoProto;
-        }
-        
-        public static CommunicatorObjects.AgentInfoProto 
-                                         AgentInfoConvertorInternal(AgentInfo info)
-        {
-
-            var agentInfoProto = new CommunicatorObjects.AgentInfoProto
-            {
-                StackedVectorObservation = { info.stackedVectorObservation },
-                StoredVectorActions = { info.storedVectorActions },
-                StoredTextActions = info.storedTextActions,
-                TextObservation = info.textObservation,
-                Reward = info.reward,
-                MaxStepReached = info.maxStepReached,
-                Done = info.done,
-                Id = info.id,
-            };
-            if (info.memories != null)
-            {
-                agentInfoProto.Memories.Add(info.memories);
-            }
-            if (info.actionMasks != null)
-            {
-                agentInfoProto.ActionMask.AddRange(info.actionMasks);
-            }
 
             int i = 1;
             Mat image = new Mat();
@@ -261,7 +229,7 @@ namespace MLAgents
             return agentInfoProto;
         }
         
-         public static Mat UnityTextureToOpenCVImage(Color32[] data, int width, int height){ 
+        public static Mat UnityTextureToOpenCVImage(Color32[] data, int width, int height){ 
 
             byte[,,] imageData = new byte[height, width, 3]; 
 
@@ -398,7 +366,7 @@ namespace MLAgents
                 foreach (Agent agent in m_currentAgents[brainKey])
                 {
                     CommunicatorObjects.AgentInfoProto agentInfoProto =
-                        AgentInfoConvertorInternal(agentInfo[agent]);
+                        AgentInfoConvertor(agentInfo[agent]);
                     AgentInfos[brainKey].Value.Add(agentInfoProto);
                 }
                 //m_hasData[brainKey] = true;
